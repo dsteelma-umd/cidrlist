@@ -59,6 +59,8 @@ Exited
 * `add <CIDR>` - Adds the given CIDR range to the current node list
 * `subtract <CIDR>` - Subtracts the given CIDR range from the current node list
 * `show` - Outputs the current node list
+* `test <CIDR>` - Returns whether or not the given CIDR range is in the current
+                  node list
 * `reset` - Resets the node list to an empty list
 
 ## Developer Instructions
