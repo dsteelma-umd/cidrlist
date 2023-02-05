@@ -1,0 +1,5 @@
+{
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "java.checkstyle.configuration": "${workspaceFolder}/checkstyle-checks.xml",
+  "java.checkstyle.version": "10.7.0"
+}
