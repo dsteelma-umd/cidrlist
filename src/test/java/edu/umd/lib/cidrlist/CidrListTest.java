@@ -43,7 +43,6 @@ public class CidrListTest {
 
     nodeList = new NodeList(Node.fromCidr("0/0", numBits));
     nodeList = NodeList.subtractNode(Node.fromCidr("7/3", numBits), nodeList);
-    System.out.println(CidrUtils.asFormattedList(nodeList, formatter));
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("6/3", "4/2", "0/1"));
 
 
@@ -65,6 +64,12 @@ public class CidrListTest {
     assertThat(CidrUtils.asFormattedList(nodeList, cidrFormatter), contains("123.45.67.89/32"));
     nodeList = NodeList.subtractNode(Node.fromCidr("123.45.67.89/24", 32), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, cidrFormatter), is(empty()));
+
+    nodeList = new NodeList();
+    nodeList = NodeList.addNode(Node.fromCidr("123.45.67.88/32", 32), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("14.24.36.12/24", 32), nodeList);
+    nodeList = NodeList.subtractNode(Node.fromCidr("14.24.36.12/32", 32), nodeList);
+    assertThat(nodeList.encompasses(Node.fromCidr("14.24.36.12/32", 32)), is(false));
   }
 
   @Test
@@ -134,15 +139,14 @@ public class CidrListTest {
     nodeList = NodeList.subtractNode(Node.fromCidr("14.24.36.12/32", 32), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder(
       "123.45.67.88/32",
-      "14.24.36.12/24",
-      "14.24.36.13/32",
-      "14.24.36.14/31",
-      "14.24.36.8/30",
-      "14.24.36.0/29",
-      "14.24.36.16/28",
-      "14.24.36.32/27",
-      "14.24.36.64/26",
-      "14.24.36.128/25"
+       "14.24.36.13/32",
+       "14.24.36.14/31",
+       "14.24.36.8/30",
+       "14.24.36.0/29",
+       "14.24.36.16/28",
+       "14.24.36.32/27",
+       "14.24.36.64/26",
+       "14.24.36.128/25"
     ));
   }
 }

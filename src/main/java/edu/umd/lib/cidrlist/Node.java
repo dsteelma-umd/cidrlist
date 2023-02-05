@@ -128,13 +128,29 @@ public final class Node {
     return siblingNode;
   }
 
+  /**
+   * Two nodes are the same if they have the same prefix length, and if
+   * their value is the same, or the value masked by the prefix length is
+   * the same.
+   *
+   * @param obj the Object to check for equality
+   * @return true if the given Object is a Node, and equivalent to the this
+   * node.
+   */
   @Override
   public boolean equals(final Object obj) {
     if (!(obj instanceof Node)) {
       return false;
     }
     Node n = (Node) obj;
-    return (n.prefixLength == this.prefixLength) && (n.value == this.value);
+    if (n.prefixLength == this.prefixLength) {
+      if (n.value == this.value) {
+        return true;
+      } else {
+        return (n.value >> (n.minBits - n.prefixLength)) == (this.value >> this.minBits - this.prefixLength);
+      }
+    }
+    return false;
   }
 
   @Override

@@ -82,7 +82,7 @@ public class NodeList implements Iterable<Node> {
         current.deleteNode(node);
         return current;
       } else if (node.hasParent()) {
-        // Node is in range covered by list, so insert sibling, ands remove
+        // Node is in range covered by list, so insert sibling, and remove
         // parent recursively
         current.insertNode(node.getSibling());
         Node parent = node.getParent();

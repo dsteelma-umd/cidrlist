@@ -28,7 +28,6 @@ $ show
 Current Node List
 ---------
 123.45.67.88/32
-14.24.36.12/24
 14.24.36.13/32
 14.24.36.14/31
 14.24.36.8/30
@@ -40,13 +39,15 @@ Current Node List
 ---------
 
 
+$ test 14.24.36.12/32
+False - 14.24.36.12/32 is not in the list
+$ test 14.24.36.13/32
+True - 14.24.36.13/32 is contained in the list
 $ reset
-$ add 0.0.0.0/0
 $ show
 ---------
 Current Node List
 ---------
-0.0.0.0/0
 ---------
 
 

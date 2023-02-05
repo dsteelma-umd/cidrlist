@@ -1,6 +1,7 @@
 package edu.umd.lib.cidrlist;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -68,4 +69,17 @@ class NodeTest {
     assertTrue(Node.fromCidr("123.45.67.89/24", 32).contains(Node.fromCidr("123.45.67.89/32", 32)));
   }
 
+  @Test
+  void test_equals() {
+    // equals() does exact match
+    assertTrue(Node.fromCidr("123.56.67.89/24", 32).equals(Node.fromCidr("123.56.67.89/24", 32)));
+    // equals() matches anything in same range assuming prefix is the same
+    assertTrue(Node.fromCidr("123.56.67.0/24", 32).equals(Node.fromCidr("123.56.67.123/24", 32)));
+    // equals() matches if prefix is not the same
+    assertFalse(Node.fromCidr("123.56.67.89/24", 32).equals(Node.fromCidr("123.56.67.89/25", 32)));
+    // equals() does not match if values do not match and outside range
+    assertFalse(Node.fromCidr("123.56.67.89/24", 32).equals(Node.fromCidr("123.56.99.89/23", 32)));
+    // equals() does not match if in range buy prefix not the same
+    assertFalse(Node.fromCidr("0.0.0.0/0", 32).equals(Node.fromCidr("123.56.99.89/23", 32)));
+  }
 }
