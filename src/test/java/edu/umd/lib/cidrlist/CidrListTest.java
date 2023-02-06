@@ -134,7 +134,7 @@ public class CidrListTest {
     ));
 
     nodeList = new NodeList();
-   nodeList = NodeList.addNode(Node.fromCidr("123.45.67.88/32", 32), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("123.45.67.88/32", 32), nodeList);
     nodeList = NodeList.addNode(Node.fromCidr("14.24.36.12/24", 32), nodeList);
     nodeList = NodeList.subtractNode(Node.fromCidr("14.24.36.12/32", 32), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder(
@@ -147,6 +147,19 @@ public class CidrListTest {
        "14.24.36.32/27",
        "14.24.36.64/26",
        "14.24.36.128/25"
+    ));
+
+    nodeList = new NodeList();
+    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.0/32", 32), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.1/32", 32), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.7/32", 32), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.3/32", 32), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.4/32", 32), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.2/32", 32), nodeList);
+    assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder(
+      "192.168.1.0/30",
+      "192.168.1.4/32",
+      "192.168.1.7/32"
     ));
   }
 }
