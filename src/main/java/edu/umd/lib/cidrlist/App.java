@@ -33,13 +33,13 @@ public final class App {
       String[] inputs = input.trim().split(" ");
       if ("add".equals(inputs[0])) {
         String cidrAddress = processCidrInput(inputs[1].trim());
-        nodeList = NodeList.addNode(Node.fromCidr(cidrAddress, numBits), nodeList);
+        nodeList = NodeList.addNode(Node.fromCidr(cidrAddress), nodeList);
       } else if ("subtract".equals(inputs[0])) {
         String cidrAddress = processCidrInput(inputs[1].trim());
-        nodeList = NodeList.subtractNode(Node.fromCidr(cidrAddress, numBits), nodeList);
+        nodeList = NodeList.subtractNode(Node.fromCidr(cidrAddress), nodeList);
       } else if ("test".equals(inputs[0])) {
         String cidrAddress = processCidrInput(inputs[1].trim());
-        if (nodeList.encompasses(Node.fromCidr(cidrAddress, numBits))) {
+        if (nodeList.encompasses(Node.fromCidr(cidrAddress))) {
           System.out.println("True - " + cidrAddress + " is contained in the list");
         } else {
           System.out.println("False - " + cidrAddress + " is not in the list");

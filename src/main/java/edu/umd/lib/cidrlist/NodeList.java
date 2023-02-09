@@ -9,9 +9,27 @@ public class NodeList implements Iterable<Node> {
   private List<Node> nodeList = new ArrayList<>();
 
   /**
+   * The maximum number of bits in a node
+   */
+  // CHECKSTYLE.OFF: MagicNumberCheck
+  private int maxBits = 32;
+  // CHECKSTYLE.ON
+
+  /**
    * Default constructor.
    */
   public NodeList() {
+  }
+
+
+  /**
+   * Constructs a NodeList that supports Nodes with the given maximum number
+   * of bits.
+   *
+   * @param maxBits the maximum number of bits in a node
+   */
+  public NodeList(final int maxBits) {
+    this.maxBits = maxBits;
   }
 
   /**
@@ -19,6 +37,17 @@ public class NodeList implements Iterable<Node> {
    * @param node the initial node for the list
    */
   public NodeList(final Node node) {
+    nodeList.add(node);
+  }
+
+  /**
+   * Constructs a NodeList with an initial Node and maxBits
+   *
+   * @param node the initial node for the list
+   * @param maxBits the maximum number of bits in a node
+   */
+  public NodeList(final Node node, final int maxBits) {
+    this(maxBits);
     nodeList.add(node);
   }
 
@@ -32,7 +61,7 @@ public class NodeList implements Iterable<Node> {
    */
   public boolean contains(final Node node) {
     for (Node n: nodeList) {
-      if ((n.getPrefixLength() == node.getPrefixLength()) && n.contains(node)) {
+      if ((n.getPrefixLength() == node.getPrefixLength()) && nodeContains(n, node)) {
         return true;
       }
     }
@@ -49,7 +78,7 @@ public class NodeList implements Iterable<Node> {
    */
   public boolean encompasses(final Node node) {
     for (Node n: nodeList) {
-      if (n.contains(node)) {
+      if (nodeContains(n, node)) {
         return true;
       }
     }
@@ -77,16 +106,30 @@ public class NodeList implements Iterable<Node> {
     // current NodeList
     if (current.encompasses(node)) {
       // In the range, check to see if Node is in list as itself
-      if (current.contains(node)) {
+      List<Node> prunedList = new ArrayList<>();
+      boolean hadDeletion = false;
+      for (Node n: current.nodeList) {
+        if (!current.nodeEquals(node, n)) {
+          prunedList.add(n);
+        } else {
+          hadDeletion = true;
+        }
+      }
+      if (hadDeletion) {
+        current.nodeList = prunedList;
+        return current;
+      }
+
+      /*if (current.contains(node)) {
         // Node is in the list, so just remove
         current.deleteNode(node);
         return current;
-      } else if (node.hasParent()) {
+      } else*/ if (current.hasParent(node)) {
         // Node is in range covered by list, so insert sibling, and remove
         // parent recursively
-        current.insertNode(node.getSibling());
-        Node parent = node.getParent();
-        subtractNode(parent, current);
+        current.insertNode(current.getSibling(node));
+        Node parent = current.getParent(node);
+        current.nodeList = subtractNode(parent, current).nodeList;
         return current;
       }
     }
@@ -95,7 +138,7 @@ public class NodeList implements Iterable<Node> {
     // that are contained in the given node
     List<Node> prunedList = new ArrayList<>();
     for (Node n: current.nodeList) {
-      if (!node.contains(n)) {
+      if (!current.nodeContains(node, n)) {
         prunedList.add(n);
       }
     }
@@ -121,7 +164,7 @@ public class NodeList implements Iterable<Node> {
     // Prune from list any nodes that are contained by the node being added
     List<Node> prunedList = new ArrayList<>();
     for (Node n: current) {
-      if (!node.contains(n)) {
+      if (!current.nodeContains(node, n)) {
         prunedList.add(n);
       }
     }
@@ -129,11 +172,11 @@ public class NodeList implements Iterable<Node> {
     current.nodeList = prunedList;
 
     // If sibling is in list, "merge" together by removing and adding parent
-    if (node.hasParent()) {
-      Node siblingNode = node.getSibling();
+    if (current.hasParent(node)) {
+      Node siblingNode = current.getSibling(node);
       if (current.contains(siblingNode)) {
         current.deleteNode(siblingNode);
-        Node parent = node.getParent();
+        Node parent = current.getParent(node);
         return NodeList.addNode(parent, current);
       } else {
         current.insertNode(node);
@@ -168,5 +211,113 @@ public class NodeList implements Iterable<Node> {
   @Override
   public Iterator<Node> iterator() {
     return Collections.unmodifiableList(nodeList).iterator();
+  }
+
+  /**
+   * @param node the Node to return the sibling of.
+   * @return the Node that is the sibling of the given Node.
+   * @throws RuntimeException if this node has no parent
+   */
+  public Node getSibling(final Node node) {
+    String binaryStrValue = Long.toBinaryString(node.getValue());
+    int prefixLength = node.getPrefixLength();
+
+    while (binaryStrValue.length() < maxBits) {
+      binaryStrValue = "0" + binaryStrValue;
+    }
+
+    int digitToReplace = prefixLength - 1;
+    char[] binaryDigits = binaryStrValue.toCharArray();
+    if (binaryDigits[digitToReplace] == '0') {
+      binaryDigits[digitToReplace] = '1';
+    } else {
+      binaryDigits[digitToReplace] = '0';
+    }
+
+    String siblingBinaryStrValue = new String(binaryDigits);
+    long siblingValue = Long.parseLong(siblingBinaryStrValue, 2);
+    Node siblingNode = new Node(siblingValue, prefixLength);
+    return siblingNode;
+  }
+
+  /**
+   * @param node the Node to check
+   * @return true if this node has a parent, false otherwise.
+   */
+  public boolean hasParent(final Node node) {
+    return node.getPrefixLength() > 0;
+  }
+
+  /**
+   * @param node the Node to return the parent of
+   * @return the parent Node of this node.
+   * @throws RuntimeException if this Node has no parent
+   */
+  public Node getParent(final Node node) {
+    if (!hasParent(node)) {
+      throw new RuntimeException("Node has no parent");
+    }
+
+    String binaryStrValue = Long.toBinaryString(node.getValue());
+    while (binaryStrValue.length() < maxBits) {
+      binaryStrValue = "0" + binaryStrValue;
+    }
+
+    int parentPrefixLength = node.getPrefixLength() - 1;
+    binaryStrValue = binaryStrValue.substring(0, parentPrefixLength);
+
+    while (binaryStrValue.length() < maxBits) {
+      binaryStrValue = binaryStrValue + "0";
+    }
+
+    long parentValue = Long.parseLong(binaryStrValue, 2);
+
+    return new Node(parentValue, parentPrefixLength);
+  }
+
+  /**
+   * Returns true if the second Node is within the range specified by the
+   * first node, false otherwise.
+   *
+   * @param thisNode the Node to check to see if it contains the other Node
+   * @param thatNode the Node to check to see if is contained
+   * @return true if the second Node is within the range specified by the
+   * first node, false otherwise.
+   */
+  public boolean nodeContains(final Node thisNode, final Node thatNode) {
+    if (thatNode.getPrefixLength() < thisNode.getPrefixLength()) {
+      return false;
+    }
+
+    int numShifts = maxBits - thisNode.getPrefixLength();
+    if (thatNode.getPrefixLength() == thisNode.getPrefixLength()) {
+      long shiftedValue = thisNode.getValue() >> numShifts;
+      long testValue = thatNode.getValue() >> numShifts;
+      return shiftedValue == testValue;
+    }
+
+    Node parent = getParent(thatNode);
+    return nodeContains(thisNode, parent);
+  }
+
+  /**
+   * Returns true if the second Node has the same value as the first Node,
+   * based on the prefix length, false otherwise
+   *
+   * @param thisNode the first Node to check
+   * @param thatNode the second Node to check
+   * @return true if the second Node has the same value as the first Node,
+   * based on the prefix length, false otherwise
+   */
+  public boolean nodeEquals(final Node thisNode, final Node thatNode) {
+    if (thisNode.getPrefixLength() == thatNode.getPrefixLength()) {
+      if (thatNode.getValue() == thisNode.getValue()) {
+        return true;
+      } else {
+        int numShifts = maxBits - thisNode.getPrefixLength();
+        return (thatNode.getValue() >> numShifts) == (thisNode.getValue() >> numShifts);
+      }
+    }
+    return false;
   }
 }

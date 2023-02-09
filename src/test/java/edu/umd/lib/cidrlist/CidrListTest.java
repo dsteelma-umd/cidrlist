@@ -17,59 +17,59 @@ public class CidrListTest {
     NodeFormatter formatter = new IntegerNodeFormatter();
     NodeList nodeList;
 
-    int numBits = 3;
+    int maxBits = 3;
 
-    nodeList = new NodeList(Node.fromCidr("0/0", numBits));
+    nodeList = new NodeList(Node.fromCidr("0/0"), maxBits);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("0/0"));
-    nodeList = NodeList.subtractNode(Node.fromCidr("0/1", numBits), nodeList);
+    nodeList = NodeList.subtractNode(Node.fromCidr("0/1"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("4/1"));
-    nodeList = NodeList.subtractNode(Node.fromCidr("4/1", numBits), nodeList);
+    nodeList = NodeList.subtractNode(Node.fromCidr("4/1"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), is(empty()));
 
-    nodeList = new NodeList(Node.fromCidr("0/0", numBits));
+    nodeList = new NodeList(Node.fromCidr("0/0"), maxBits);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("0/0"));
-    nodeList = NodeList.subtractNode(Node.fromCidr("4/1", numBits), nodeList);
+    nodeList = NodeList.subtractNode(Node.fromCidr("4/1"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("0/1"));
-    nodeList = NodeList.subtractNode(Node.fromCidr("0/1", numBits), nodeList);
+    nodeList = NodeList.subtractNode(Node.fromCidr("0/1"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), is(empty()));
 
-    nodeList = new NodeList(Node.fromCidr("2/2", numBits));
+    nodeList = new NodeList(Node.fromCidr("2/2"), maxBits);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("2/2"));
-    nodeList = NodeList.subtractNode(Node.fromCidr("3/3", numBits), nodeList);
+    nodeList = NodeList.subtractNode(Node.fromCidr("3/3"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("2/3"));
-    nodeList = NodeList.subtractNode(Node.fromCidr("2/3", numBits), nodeList);
+    nodeList = NodeList.subtractNode(Node.fromCidr("2/3"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), is(empty()));
 
 
-    nodeList = new NodeList(Node.fromCidr("0/0", numBits));
-    nodeList = NodeList.subtractNode(Node.fromCidr("7/3", numBits), nodeList);
+    nodeList = new NodeList(Node.fromCidr("0/0"), maxBits);
+    nodeList = NodeList.subtractNode(Node.fromCidr("7/3"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("6/3", "4/2", "0/1"));
 
 
-    nodeList = new NodeList(Node.fromCidr("0/0", numBits));
-    nodeList = NodeList.subtractNode(Node.fromCidr("7/3", numBits), nodeList);
+    nodeList = new NodeList(Node.fromCidr("0/0"), maxBits);
+    nodeList = NodeList.subtractNode(Node.fromCidr("7/3"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("6/3", "4/2", "0/1"));
-    nodeList = NodeList.subtractNode(Node.fromCidr("6/3", numBits), nodeList);
+    nodeList = NodeList.subtractNode(Node.fromCidr("6/3"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("4/2", "0/1"));
-    nodeList = NodeList.subtractNode(Node.fromCidr("5/3", numBits), nodeList);
+    nodeList = NodeList.subtractNode(Node.fromCidr("5/3"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("4/3", "0/1"));
-    nodeList = NodeList.subtractNode(Node.fromCidr("4/3", numBits), nodeList);
-    nodeList = NodeList.subtractNode(Node.fromCidr("3/3", numBits), nodeList);
-    nodeList = NodeList.subtractNode(Node.fromCidr("2/3", numBits), nodeList);
-    nodeList = NodeList.subtractNode(Node.fromCidr("0/3", numBits), nodeList);
+    nodeList = NodeList.subtractNode(Node.fromCidr("4/3"), nodeList);
+    nodeList = NodeList.subtractNode(Node.fromCidr("3/3"), nodeList);
+    nodeList = NodeList.subtractNode(Node.fromCidr("2/3"), nodeList);
+    nodeList = NodeList.subtractNode(Node.fromCidr("0/3"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), contains("1/3"));
 
     CidrNodeFormatter cidrFormatter = new CidrNodeFormatter();
-    nodeList = new NodeList(Node.fromCidr("123.45.67.89/32", 32));
+    nodeList = new NodeList(Node.fromCidr("123.45.67.89/32"), 32);
     assertThat(CidrUtils.asFormattedList(nodeList, cidrFormatter), contains("123.45.67.89/32"));
-    nodeList = NodeList.subtractNode(Node.fromCidr("123.45.67.89/24", 32), nodeList);
+    nodeList = NodeList.subtractNode(Node.fromCidr("123.45.67.89/24"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, cidrFormatter), is(empty()));
 
-    nodeList = new NodeList();
-    nodeList = NodeList.addNode(Node.fromCidr("123.45.67.88/32", 32), nodeList);
-    nodeList = NodeList.addNode(Node.fromCidr("14.24.36.12/24", 32), nodeList);
-    nodeList = NodeList.subtractNode(Node.fromCidr("14.24.36.12/32", 32), nodeList);
-    assertThat(nodeList.encompasses(Node.fromCidr("14.24.36.12/32", 32)), is(false));
+    nodeList = new NodeList(32);
+    nodeList = NodeList.addNode(Node.fromCidr("123.45.67.88/32"), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("14.24.36.12/24"), nodeList);
+    nodeList = NodeList.subtractNode(Node.fromCidr("14.24.36.12/32"), nodeList);
+    assertThat(nodeList.encompasses(Node.fromCidr("14.24.36.12/32")), is(false));
   }
 
   @Test
@@ -77,35 +77,35 @@ public class CidrListTest {
     NodeFormatter formatter = new IntegerNodeFormatter();
     NodeList nodeList;
 
-    int numBits = 3;
+    int maxBits = 3;
 
-    nodeList = new NodeList();
-    nodeList = NodeList.addNode(Node.fromCidr("7/3", numBits), nodeList);
+    nodeList = new NodeList(maxBits);
+    nodeList = NodeList.addNode(Node.fromCidr("7/3"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("7/3"));
-    nodeList = NodeList.addNode(Node.fromCidr("6/3", numBits), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("6/3"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("6/2"));
-    nodeList = NodeList.addNode(Node.fromCidr("0/3", numBits), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("0/3"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("6/2", "0/3"));
-    nodeList = NodeList.addNode(Node.fromCidr("0/2", numBits), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("0/2"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("6/2", "0/2"));
-    nodeList = NodeList.addNode(Node.fromCidr("0/1", numBits), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("0/1"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("6/2", "0/1"));
-    nodeList = NodeList.addNode(Node.fromCidr("0/0", numBits), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("0/0"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("0/0"));
 
-    nodeList = new NodeList();
-    nodeList = NodeList.addNode(Node.fromCidr("7/3", numBits), nodeList);
-    nodeList = NodeList.addNode(Node.fromCidr("6/3", numBits), nodeList);
+    nodeList = new NodeList(maxBits);
+    nodeList = NodeList.addNode(Node.fromCidr("7/3"), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("6/3"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("6/2"));
-    nodeList = NodeList.addNode(Node.fromCidr("5/3", numBits), nodeList);
-    nodeList = NodeList.addNode(Node.fromCidr("4/3", numBits), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("5/3"), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("4/3"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("4/1"));
-    nodeList = NodeList.addNode(Node.fromCidr("3/3", numBits), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("3/3"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("4/1", "3/3"));
-    nodeList = NodeList.addNode(Node.fromCidr("2/3", numBits), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("2/3"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("4/1", "2/2"));
-    nodeList = NodeList.addNode(Node.fromCidr("1/3", numBits), nodeList);
-    nodeList = NodeList.addNode(Node.fromCidr("0/3", numBits), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("1/3"), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("0/3"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("0/0"));
   }
 
@@ -115,28 +115,28 @@ public class CidrListTest {
     NodeList nodeList;
     nodeList = new NodeList();
 
-    NodeList.addNode(Node.fromCidr("192.168.4.56/32", 32), nodeList);
+    NodeList.addNode(Node.fromCidr("192.168.4.56/32"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder("192.168.4.56/32"));
-    NodeList.addNode(Node.fromCidr("204.45.21.45/24", 32), nodeList);
+    NodeList.addNode(Node.fromCidr("204.45.21.45/24"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder(
         "192.168.4.56/32",
         "204.45.21.45/24"
     ));
-    NodeList.addNode(Node.fromCidr("0.0.0.0/32", 32), nodeList);
+    NodeList.addNode(Node.fromCidr("0.0.0.0/32"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder(
         "192.168.4.56/32",
         "204.45.21.45/24",
         "0.0.0.0/32"
     ));
-    NodeList.addNode(Node.fromCidr("0.0.0.0/0", 32), nodeList);
+    NodeList.addNode(Node.fromCidr("0.0.0.0/0"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder(
         "0.0.0.0/0"
     ));
 
     nodeList = new NodeList();
-    nodeList = NodeList.addNode(Node.fromCidr("123.45.67.88/32", 32), nodeList);
-    nodeList = NodeList.addNode(Node.fromCidr("14.24.36.12/24", 32), nodeList);
-    nodeList = NodeList.subtractNode(Node.fromCidr("14.24.36.12/32", 32), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("123.45.67.88/32"), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("14.24.36.12/24"), nodeList);
+    nodeList = NodeList.subtractNode(Node.fromCidr("14.24.36.12/32"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder(
       "123.45.67.88/32",
        "14.24.36.13/32",
@@ -150,12 +150,12 @@ public class CidrListTest {
     ));
 
     nodeList = new NodeList();
-    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.0/32", 32), nodeList);
-    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.1/32", 32), nodeList);
-    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.7/32", 32), nodeList);
-    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.3/32", 32), nodeList);
-    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.4/32", 32), nodeList);
-    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.2/32", 32), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.0/32"), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.1/32"), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.7/32"), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.3/32"), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.4/32"), nodeList);
+    nodeList = NodeList.addNode(Node.fromCidr("192.168.1.2/32"), nodeList);
     assertThat(CidrUtils.asFormattedList(nodeList, formatter), containsInAnyOrder(
       "192.168.1.0/30",
       "192.168.1.4/32",

@@ -6,32 +6,28 @@ package edu.umd.lib.cidrlist;
 public final class Node {
   private long value = 0;
   private int prefixLength = 0;
-  private int minBits;
 
   /**
    * Creates a Node with the given values
    *
    * @param value the long value for the node
    * @param prefixLength the prefix length
-   * @param numBits the total number of bits used by all nodes
    */
-  public Node(final long value, final int prefixLength, final int numBits) {
+  public Node(final long value, final int prefixLength) {
     this.value = value;
     this.prefixLength = prefixLength;
-    this.minBits = numBits;
   }
 
   /**
    * Creates a Node from the given CIDR-formatted string
    *
    * @param cidr the CIDR-formatted String to use to create the node
-   * @param numBits the total nunber of bits for all nodes
    * @return a Node based on the given CIDR String
    */
-  public static Node fromCidr(final String cidr, final int numBits) {
+  public static Node fromCidr(final String cidr) {
     long value = CidrUtils.cidrToLong(cidr);
     int prefixLength = CidrUtils.cidrPrefixLength(cidr);
-    return new Node(value, prefixLength, numBits);
+    return new Node(value, prefixLength);
   }
 
   /**
@@ -49,93 +45,12 @@ public final class Node {
   }
 
   /**
-   * @return true if this node has a parent, false otherwise.
-   */
-  public boolean hasParent() {
-    return prefixLength > 0;
-  }
-
-  /**
-   * @return the parent Node of this node.
-   * @throws RuntimeException if this Node has no parent
-   */
-  public Node getParent() {
-    if (!hasParent()) {
-      throw new RuntimeException("Node has no parent");
-    }
-
-    String binaryStrValue = Long.toBinaryString(value);
-    while (binaryStrValue.length() < minBits) {
-      binaryStrValue = "0" + binaryStrValue;
-    }
-
-    int parentPrefixLength = prefixLength - 1;
-    binaryStrValue = binaryStrValue.substring(0, parentPrefixLength);
-
-    while (binaryStrValue.length() < minBits) {
-      binaryStrValue = binaryStrValue + "0";
-    }
-
-    long parentValue = Long.parseLong(binaryStrValue, 2);
-
-    return new Node(parentValue, parentPrefixLength, minBits);
-  }
-
-  /**
-   * Returns true if the given Node is within the range specified by this node,
-   * false otherwise.
-   *
-   * @param node the node to check.
-   * @return true if the given Node is within the range specified by this node,
-   * false otherwise.
-   */
-  public boolean contains(final Node node) {
-    if (node.prefixLength < this.prefixLength) {
-      return false;
-    }
-
-    if (node.prefixLength == this.prefixLength) {
-      long shiftedValue = this.value >> (this.minBits - prefixLength);
-      long testValue = node.value >> (this.minBits - prefixLength);
-      return shiftedValue == testValue;
-    }
-
-    Node parent = node.getParent();
-    return contains(parent);
-  }
-
-  /**
-   * @return the Node that is a sibling of this node.
-   * @throws RuntimeException if this node has no parent
-   */
-  public Node getSibling() {
-    String binaryStrValue = Long.toBinaryString(value);
-    while (binaryStrValue.length() < minBits) {
-      binaryStrValue = "0" + binaryStrValue;
-    }
-
-    int digitToReplace = prefixLength - 1;
-    char[] binaryDigits = binaryStrValue.toCharArray();
-    if (binaryDigits[digitToReplace] == '0') {
-      binaryDigits[digitToReplace] = '1';
-    } else {
-      binaryDigits[digitToReplace] = '0';
-    }
-
-    String siblingBinaryStrValue = new String(binaryDigits);
-    long siblingValue = Long.parseLong(siblingBinaryStrValue, 2);
-    Node siblingNode = new Node(siblingValue, prefixLength, minBits);
-    return siblingNode;
-  }
-
-  /**
-   * Two nodes are the same if they have the same prefix length, and if
-   * their value is the same, or the value masked by the prefix length is
-   * the same.
+   * Two nodes are exactly equal if they have the same prefix length, and
+   * their value is the same,
    *
    * @param obj the Object to check for equality
-   * @return true if the given Object is a Node, and equivalent to the this
-   * node.
+   * @return true if the given Object is a Node, and has the same prefix length
+   * and value as this node.
    */
   @Override
   public boolean equals(final Object obj) {
@@ -143,14 +58,7 @@ public final class Node {
       return false;
     }
     Node n = (Node) obj;
-    if (n.prefixLength == this.prefixLength) {
-      if (n.value == this.value) {
-        return true;
-      } else {
-        return (n.value >> (n.minBits - n.prefixLength)) == (this.value >> this.minBits - this.prefixLength);
-      }
-    }
-    return false;
+    return (n.prefixLength == this.prefixLength) && (n.value == this.value);
   }
 
   @Override
@@ -160,7 +68,6 @@ public final class Node {
     int result = 17;
     result = 31 * result + (int) (value ^ (value >>> 32));
     result = 31 * result + prefixLength;
-    result = 31 * result + minBits;
     // CHECKSTYLE.ON
     return result;
   }
