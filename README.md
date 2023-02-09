@@ -78,6 +78,16 @@ $ mvn clean package
 mvn test
 ```
 
+### Example JShell Usage
+
+```
+$ jshell --class-path target/cidrlist-0.0.1-SNAPSHOT.jar
+
+jshell>import edu.umd.lib.cidrlist.*
+jshell>NodeList nodeList = new NodeList(3)
+jshell>nodeList = nodeList.addNode(new Node(1, 3), nodeList)
+```
+
 ### Run Checkstyle Checks
 
 ```

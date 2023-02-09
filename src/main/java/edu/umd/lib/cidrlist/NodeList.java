@@ -5,9 +5,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import edu.umd.lib.cidrlist.formatters.IntegerNodeFormatter;
+
 public class NodeList implements Iterable<Node> {
   private List<Node> nodeList = new ArrayList<>();
-
+  private NodeFormatter formatter = new IntegerNodeFormatter();
   /**
    * The maximum number of bits in a node
    */
@@ -95,6 +97,16 @@ public class NodeList implements Iterable<Node> {
     nodeList.add(node);
   }
 
+  private boolean removeEquivalentNode(final Node node) {
+    for (Node n: nodeList) {
+      if (this.nodeEquals(node, n)) {
+        nodeList.remove(n);
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Removes the given Node from the range covered by the given NodeList
    * @param node the Node to remove
@@ -105,26 +117,17 @@ public class NodeList implements Iterable<Node> {
     // Check to see if the given node is even in the range covered by the
     // current NodeList
     if (current.encompasses(node)) {
-      // In the range, check to see if Node is in list as itself
-      List<Node> prunedList = new ArrayList<>();
-      boolean hadDeletion = false;
-      for (Node n: current.nodeList) {
-        if (!current.nodeEquals(node, n)) {
-          prunedList.add(n);
-        } else {
-          hadDeletion = true;
-        }
-      }
-      if (hadDeletion) {
-        current.nodeList = prunedList;
+      // In the range, check to see if Node (or its "equivalent", i.e., the
+      // value is the same within the limit of the prefixLength)
+      boolean nodeRemoved = current.removeEquivalentNode(node);
+
+      if (nodeRemoved) {
+        // Equivalent node was removed from list, so return
+        // current.deleteNode(node);
         return current;
       }
 
-      /*if (current.contains(node)) {
-        // Node is in the list, so just remove
-        current.deleteNode(node);
-        return current;
-      } else*/ if (current.hasParent(node)) {
+      if (current.hasParent(node)) {
         // Node is in range covered by list, so insert sibling, and remove
         // parent recursively
         current.insertNode(current.getSibling(node));
@@ -132,6 +135,7 @@ public class NodeList implements Iterable<Node> {
         current.nodeList = subtractNode(parent, current).nodeList;
         return current;
       }
+      return current;
     }
 
     // If the node isn't in the list, make sure to remove any nodes in the list
@@ -196,11 +200,16 @@ public class NodeList implements Iterable<Node> {
    */
   @Override
   public String toString() {
-    StringBuffer sb = new StringBuffer();
+    // StringBuffer sb = new StringBuffer();
+    // for (Node n: nodeList) {
+    //   sb.append(n.toString() + "\n");
+    // }
+    List<String> formattedNodes = new ArrayList<>();
     for (Node n: nodeList) {
-      sb.append(n.toString() + "\n");
+      formattedNodes.add(formatter.format(n));
     }
-    return sb.toString();
+
+    return formattedNodes.toString();
   }
 
   /**
